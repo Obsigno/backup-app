@@ -26,9 +26,9 @@
     LockClosed
   } from 'svelte-heros-v2';
   import { sineIn } from 'svelte/easing';
-  import { DonutChart, LineChart } from '@carbon/charts-svelte';
-  import '@carbon/styles/css/styles.css';
-  import '@carbon/charts/styles.css';
+  // import { DonutChart, LineChart } from '@carbon/charts-svelte';
+  // import '@carbon/styles/css/styles.css';
+  // import '@carbon/charts/styles.css';
 
   let transitionParams = {
     x: -320,
@@ -132,7 +132,7 @@
   <div class="flex flex-row">
     <div class="basic-1/2">
       <Card>
-        <DonutChart
+        <!-- <DonutChart -->
           data={[
             {
               group: '2V2N 9KYPM version 1',
@@ -175,12 +175,12 @@
             },
             height: '400px'
           }}
-        />
+        <!-- /> -->
       </Card>
     </div>
     <div class="basic-1/2">
       <Card>
-        <LineChart
+        <!-- <LineChart
           data={[
             {
               group: 'Dataset 1',
@@ -321,7 +321,7 @@
             },
             curve: 'curveMonotoneX',
             height: '400px'
-          }}
+          }} -->
         />
       </Card>
     </div>
