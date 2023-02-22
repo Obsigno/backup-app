@@ -22,17 +22,15 @@ async function getFiles() {
 }
 
 export const load = (async () => {
-    const files = await getFiles();
-    const mappedFiels = files.map(file => ({
-        ...file,
-        data: file.createdAt,
-        priority: getKeyByValue(Priority, file.priority),
-        accessLevel: getKeyByValue(AccessLevel, file.accessLevel),
-    }));
+    if (import.meta.env.MODE !== 'demo') {
+        const files = await getFiles();
+        const mappedFiels = files.map(file => ({
+            ...file,
+            data: file.createdAt,
+            priority: getKeyByValue(Priority, file.priority),
+            accessLevel: getKeyByValue(AccessLevel, file.accessLevel),
+        }));
 
-    FileItemsStore.set(mappedFiels);
-
-    return {
-        files
-    };
+        FileItemsStore.set(mappedFiels);
+    }
 }) satisfies PageLoad;

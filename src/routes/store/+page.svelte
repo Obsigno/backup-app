@@ -82,42 +82,42 @@
 
       if (!file) {
         console.log('Failed to find matched file of: ', containerFile.name);
-      } else {
-        var formdata = new FormData();
-        formdata.append('file', file, file.name);
+      } else if (import.meta.env.MODE !== 'demo') {
+          var formdata = new FormData();
+          formdata.append('file', file, file.name);
 
-        let requestOptions: RequestInit = {
-          method: 'POST',
-          body: formdata
-        };
+          let requestOptions: RequestInit = {
+            method: 'POST',
+            body: formdata
+          };
 
-        let res = await fetch('http://localhost:8080/files', requestOptions);
-        let data = await res.json();
+          let res = await fetch('http://localhost:8080/files', requestOptions);
+          let data = await res.json();
 
-        requestOptions = {
-          method: 'PATCH',
-          body: JSON.stringify({
-            id: data.id,
-            priority: containerFile.priority.toUpperCase(),
-            accessLevel: containerFile.accessLevel.toUpperCase()
-          }),
-          headers: {
-            "content-type": "application/json"
+          requestOptions = {
+            method: 'PATCH',
+            body: JSON.stringify({
+              id: data.id,
+              priority: containerFile.priority.toUpperCase(),
+              accessLevel: containerFile.accessLevel.toUpperCase()
+            }),
+            headers: {
+              'content-type': 'application/json'
+            }
+          };
+
+          res = await fetch('http://localhost:8080/files', requestOptions);
+
+          if (res.ok) {
+            containerFile.id = data.id;
+          } else {
+            throw new Error(data);
           }
-        };
-
-        res = await fetch('http://localhost:8080/files', requestOptions);
-
-        if (res.ok) {
-          containerFiles = [];
-          ContainerFileItemsStore.update(() => containerFiles);
-          containerFile.id = data.id;
-          newFiles.push(containerFile);
-        } else {
-          throw new Error(data);
         }
+
+        ContainerFileItemsStore.update(() => []);
+        newFiles.push(containerFile);
       }
-    }
 
     return newFiles;
   }
@@ -197,14 +197,11 @@
   $: filteredItems = containerFiles.filter(
     (item: any) => item.name.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1
   );
-  
 
   // store table dispatch
   function removeFileUpdate(e) {
     const name = e.detail.name;
-    containerFiles = containerFiles.filter(
-      (item: any) => item.name !== name
-    );
+    containerFiles = containerFiles.filter((item: any) => item.name !== name);
     ContainerFileItemsStore.update(() => containerFiles);
   }
 </script>
@@ -235,7 +232,11 @@
     <Search bind:value={searchTerm} class="dark:bg-transparent w-56" />
   </div>
 </div>
-<FilesTable fileItems={filteredItems} {checkAllRows} on:removeFileUpdate={(e) => removeFileUpdate(e)}/>
+<FilesTable
+  fileItems={filteredItems}
+  {checkAllRows}
+  on:removeFileUpdate={(e) => removeFileUpdate(e)}
+/>
 {#if !containerFiles.length}
   <div class="flex items-center justify-center ">No data to show</div>
 {/if}
@@ -266,23 +267,8 @@
 </div>
 <Modal title="New Items To Close" bind:open={newFileModal} autoclose>
   <Dropzone id="dropzone" on:change={handleFilesSelect} bind:files>
-    <svg
-      aria-hidden="true"
-      class="mb-3 w-10 h-10 text-gray-400"
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-      xmlns="http://www.w3.org/2000/svg"
-      ><path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="2"
-        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-      /></svg
-    >
-    <p class="mb-2 text-sm text-gray-500 dark:text-gray-400">
-      <span class="font-semibold">Click to upload</span> or drag and drop
-    </p>
+    <svg aria-hidden="true" class="mb-3 w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+    <p class="m-5 mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
     <p class="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF (MAX. 800x400px)</p>
   </Dropzone>
 </Modal>

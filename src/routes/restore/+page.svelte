@@ -25,6 +25,8 @@
 
 
   async function handleStartRestore() {
+    if (import.meta.env.MODE === 'demo') return;
+    
     for await (const file of fileItems) {
       const res = await self.fetch(`http://localhost:8080${file.downloadUri}`);
 

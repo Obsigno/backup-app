@@ -26,9 +26,9 @@
     LockClosed
   } from 'svelte-heros-v2';
   import { sineIn } from 'svelte/easing';
-  // import { DonutChart, LineChart } from '@carbon/charts-svelte';
-  // import '@carbon/styles/css/styles.css';
-  // import '@carbon/charts/styles.css';
+  import { DonutChart, LineChart } from '@carbon/charts-svelte';
+  import '@carbon/styles/css/styles.css';
+  import '@carbon/charts/styles.css';
 
   let transitionParams = {
     x: -320,
@@ -132,7 +132,7 @@
   <div class="flex flex-row">
     <div class="basic-1/2">
       <Card>
-        <!-- <DonutChart -->
+        <DonutChart
           data={[
             {
               group: '2V2N 9KYPM version 1',
@@ -160,27 +160,31 @@
             }
           ]}
           options={{
+            legend: {
+              enabled: false
+            },
             toolbar: {
               enabled: false
             },
-            resizable: true,
-            legend: {
-              alignment: 'center'
+            tooltip: {
+              enabled: false,
             },
             donut: {
-              center: {
-                label: 'Browsers'
-              },
               alignment: 'center'
             },
-            height: '400px'
+            height: '300px',
+            pie: {
+              labels: {
+                enabled: false
+              }
+            }
           }}
-        <!-- /> -->
+        />
       </Card>
     </div>
     <div class="basic-1/2">
       <Card>
-        <!-- <LineChart
+        <LineChart
           data={[
             {
               group: 'Dataset 1',
@@ -304,24 +308,28 @@
             }
           ]}
           options={{
+           legend: {
+              enabled: false
+            },
             toolbar: {
               enabled: false
             },
+            tooltip: {
+              enabled: false,
+            },
             axes: {
               bottom: {
-                title: '2019 Annual Sales Figures',
                 mapsTo: 'date',
                 scaleType: 'time'
               },
               left: {
                 mapsTo: 'value',
-                title: 'Conversion rate',
                 scaleType: 'linear'
               }
             },
             curve: 'curveMonotoneX',
-            height: '400px'
-          }} -->
+            height: '300px'
+          }}
         />
       </Card>
     </div>
