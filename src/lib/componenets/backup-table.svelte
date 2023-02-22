@@ -15,8 +15,8 @@
   import { Trash } from 'svelte-heros-v2';
 
   export let fileItems: any[];
-  // TODOD get the priority if the user is the owner
-  const priorityTypes = ['Owner', 'Other'];
+  // TODD get the priority if the user is the owner
+  const priorityTypes = ['High', 'Medium', 'Low'];
   let allFilesChecked: boolean = false;
 
   function checkAllFiles() {

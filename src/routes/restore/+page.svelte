@@ -6,7 +6,7 @@
   } from 'flowbite-svelte';
   import { Funnel } from 'svelte-heros-v2';
   import LoginModal from '$lib/componenets/login-modal.svelte';
-  import FilesTable from '$lib/componenets/files-table.svelte';
+  import FilesTable from '$lib/componenets/store-table.svelte';
   import FileItemsStore from '$lib/store/files';
 
   let loginModal = false;

@@ -13,11 +13,16 @@
     TableHeadCell
   } from 'flowbite-svelte';
   import { Trash } from 'svelte-heros-v2';
+  import { createEventDispatcher } from 'svelte';
+  import { Priority } from '$lib/enum/priority';
+  import { AccessLevel } from '$lib/enum/access-level';
+
+  const dispatch = createEventDispatcher();
 
   export let fileItems: any[];
   export let checkAllRows: boolean = false;
 
-  const priorityTypes = ['Owner', 'Other'];
+  const priorityTypes = ['High', 'Medium', 'Low'];
   const accessLevelTypes = ['Managment', 'Finance', 'Marketing', 'Sales', 'Legal', 'HR', 'R&D', 'IT', 'Operations' ];
 
   function checkAllFiles() {
@@ -27,8 +32,9 @@
     });
   }
 
-  function removeFile(selectedItem: any) {
-    fileItems = fileItems.filter((i) => i.name !== selectedItem.name);
+  function removeFile({name}: any) {
+    fileItems = fileItems.filter((i) => i.name !== name);
+    dispatch('removeFileUpdate', { name });
   }
 </script>
 
@@ -49,7 +55,7 @@
     {#each fileItems as item}
       <TableBodyRow>
         <TableBodyCell>
-          <Checkbox checked={item.checked} />
+          <Checkbox bind:checked={item.checked} />
         </TableBodyCell>
         <TableBodyCell>{item.name}</TableBodyCell>
         <TableBodyCell>{item.size}</TableBodyCell>

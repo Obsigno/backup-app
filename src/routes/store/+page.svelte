@@ -18,8 +18,9 @@
   } from 'flowbite-svelte';
   import { Funnel } from 'svelte-heros-v2';
   import LoginModal from '$lib/componenets/login-modal.svelte';
-  import FilesTable from '$lib/componenets/files-table.svelte';
+  import FilesTable from '$lib/componenets/store-table.svelte';
   import FileItemsStore from '$lib/store/files';
+  import ContainerFileItemsStore from '$lib/store/container-files';
 
   let containerFiles: any[] = [];
   const scheduledOptions = ['Once', 'Daily', 'Weekly', 'Monthly', 'Custom'];
@@ -28,13 +29,14 @@
   let newFileModal = false;
   let previouslyStoredModal = false;
   let loginModal = false;
-  const priorityTypes = ['Owner', 'Other'];
   let previouslyStoredItems: any[] = [];
   let files: FileList;
   let checkAllRows = false;
   let scheduleDropdownOpen = false;
   let searchTerm = '';
   let allFilesChecked: boolean = false;
+
+  // let promise = FileItemsStore.init();
 
   // Inner
   async function startSharding(e) {
@@ -65,6 +67,7 @@
       item.checked = false;
       return item;
     });
+    ContainerFileItemsStore.subscribe(() => containerFiles);
   }
 
   async function createFile() {
@@ -75,14 +78,7 @@
       .filter(({ name }) => name.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1);
 
     for await (const containerFile of filteredCehkedConrainerFiles) {
-      let file: File;
-
-      for (let f of files) {
-        if (f.name === containerFile.name) {
-          file = f;
-          break;
-        }
-      }
+      let file: File = containerFile.file;
 
       if (!file) {
         console.log('Failed to find matched file of: ', containerFile.name);
@@ -90,16 +86,32 @@
         var formdata = new FormData();
         formdata.append('file', file, file.name);
 
-        const requestOptions: RequestInit = {
+        let requestOptions: RequestInit = {
           method: 'POST',
           body: formdata
         };
 
-        const res = await fetch('http://localhost:8080/files', requestOptions);
-        const data = await res.json();
+        let res = await fetch('http://localhost:8080/files', requestOptions);
+        let data = await res.json();
+
+        requestOptions = {
+          method: 'PATCH',
+          body: JSON.stringify({
+            id: data.id,
+            priority: containerFile.priority.toUpperCase(),
+            accessLevel: containerFile.accessLevel.toUpperCase()
+          }),
+          headers: {
+            "content-type": "application/json"
+          }
+        };
+
+        res = await fetch('http://localhost:8080/files', requestOptions);
 
         if (res.ok) {
           containerFiles = [];
+          ContainerFileItemsStore.update(() => containerFiles);
+          containerFile.id = data.id;
           newFiles.push(containerFile);
         } else {
           throw new Error(data);
@@ -124,12 +136,15 @@
         date: new Date().toISOString(),
         folder: file.webkitRelativePath,
         type: file.type,
-        priority: 'Owner',
-        accessLevel: 'R&D',
-        checked: false
+        priority: 'High', // Default
+        accessLevel: 'R&D', // Default
+        checked: false,
+        file
       };
 
       containerFiles = [newConrainerFile, ...containerFiles];
+
+      ContainerFileItemsStore.update(() => containerFiles);
     }
 
     newFileModal = false;
@@ -138,6 +153,10 @@
   // Previously added
   FileItemsStore.subscribe((data: any) => {
     previouslyStoredItems = data;
+  });
+
+  ContainerFileItemsStore.subscribe((data: any) => {
+    containerFiles = data;
   });
 
   function addToContainer() {
@@ -149,15 +168,12 @@
         .map((item) => {
           return {
             ...item,
-            ...{ priority: getRandomPriorityType() },
             ...{ checked: false }
           };
         })
     ];
-  }
 
-  function getRandomPriorityType() {
-    return priorityTypes[Math.floor(Math.random() * priorityTypes.length)];
+    ContainerFileItemsStore.update(() => containerFiles);
   }
 
   // Model priviosle stored
@@ -181,6 +197,16 @@
   $: filteredItems = containerFiles.filter(
     (item: any) => item.name.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1
   );
+  
+
+  // store table dispatch
+  function removeFileUpdate(e) {
+    const name = e.detail.name;
+    containerFiles = containerFiles.filter(
+      (item: any) => item.name !== name
+    );
+    ContainerFileItemsStore.update(() => containerFiles);
+  }
 </script>
 
 <h1 class="text-2xl ">Storing list</h1>
@@ -209,7 +235,7 @@
     <Search bind:value={searchTerm} class="dark:bg-transparent w-56" />
   </div>
 </div>
-<FilesTable fileItems={filteredItems} {checkAllRows} />
+<FilesTable fileItems={filteredItems} {checkAllRows} on:removeFileUpdate={(e) => removeFileUpdate(e)}/>
 {#if !containerFiles.length}
   <div class="flex items-center justify-center ">No data to show</div>
 {/if}
